@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garagem | MyCavallino</title>
+    <link rel="stylesheet" href="Assets/style/style_garagem.css">
+</head>
+
+<body>
+    <!-- TOPO -->
+    <header class="topo">
+        <!-- Menu -->
+        <div class="menu-container">
+            <a href="#menu" id="toggle"><span></span></a>
+
+            <div id="menu">
+                <ul>
+                    <li><a href="./dashboard.html">MÉTRICAS</a></li>
+                    <li><a href="./garagem.html">GARAGEM</a></li>
+                    <li><a href="./pagina.html">MODELOS</a></li>
+                    <li><a href="./index.html">SAIR</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="logo-centro">
+            <img src="./Assets/img/MyPagina(4).png" alt="Logo MyCavallino" />
+        </div>
+
+        <!-- Saudação -->
+        <div class="saudacao">
+            <p>Olá, <span id="nome-usuario">Usuário</span></p>
+        </div>
+    </header>
+    <main class="conteudo">
+        <section class="conteudo-salvo">
+            <div id="garagem-container"></div>
+        </section>
+    </main>
+
+</body>
+
+</html>
+
+<script>
+
+    let listaPersonalizacoes = [];
+
+
+    // Lógica do menu
+    const toggle = document.getElementById('toggle');
+    const menuContainer = toggle.parentElement;
+
+    toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        toggle.classList.toggle('on');
+        menuContainer.classList.toggle('on');
+    });
+
+    document.addEventListener('click', function (e) {
+        const isClickInside = menuContainer.contains(e.target);
+        if (!isClickInside && menuContainer.classList.contains('on')) {
+            toggle.classList.remove('on');
+            menuContainer.classList.remove('on');
+        }
+    });
+
+    document.getElementById("nome-usuario").textContent = `${sessionStorage.NOME_USUARIO}`;
+
+    // upload dos carros salvos
+    window.onload = () => {
+        listar();
+        // const garagem = JSON.parse(localStorage.getItem("minhaGaragem") || "[]");
+
+        let modelo = sessionStorage.getItem("modeloSelecionado");
+        let corSelecionada = "laranja";
+
+
+
+
+    };
+
+    function listar() {
+
+        const container = document.getElementById("garagem-container");
+
+        fetch("/personalizacao/listar", {
+            method: "GET",
+        })
+            .then(function (resposta) {
+                resposta.json().then((personalizacoes) => {
+
+                    if (personalizacoes.length === 0) {
+                        container.innerHTML = "<p>Nenhum carro salvo ainda.</p>";
+                        return;
+                    }
+
+                    personalizacoes.forEach((personalizacao) => {
+
+                        const div = document.createElement("div");
+                        div.innerHTML = `<h3>${personalizacao.modelo.toUpperCase()}</h3>
+                                                    <img src="./Assets/img/${personalizacao.modelo}/frente/${personalizacao.cor}.jpg" width="120">
+                                                <p>Cor: ${personalizacao.cor}</p>
+                                                <hr/>
+                                                `;
+                        container.appendChild(div);
+
+
+                    });
+                });
+            })
+            .catch(function (resposta) {
+                console.log(`#ERRO: ${resposta}`);
+            });
+    }
+
+</script>

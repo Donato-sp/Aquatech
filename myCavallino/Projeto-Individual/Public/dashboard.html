@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./Assets/style/style_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- TOPO -->
+    <header class="topo">
+        <!-- Menu -->
+        <div class="menu-container">
+            <a href="#menu" id="toggle"><span></span></a>
+
+            <div id="menu">
+                <ul>
+                    <li><a href="./dashboard.html">MÉTRICAS</a></li>
+                    <li><a href="./garagem.html">GARAGEM</a></li>
+                    <li><a href="./pagina.html">MODELOS</a></li>
+                    <li><a onClick="sessionStorage.clear()" href="./index.html">SAIR</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="logo-centro">
+            <img src="./Assets/img/MyPagina(4).png" alt="Logo MyCavallino" />
+        </div>
+
+
+        <div class="saudacao">
+            <p>Olá, <span id="nome-usuario">Usuário</span></p>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="conteudo-dashboard">
+
+        <!-- KPIs -->
+        <section class="kpis">
+            <div class="kpi">
+                <h3>Ferraris Personalizadas</h3>
+                <p id="qtd-personalizadas">0</p>
+            </div>
+
+            <div class="kpi">
+                <h3>Modelos Restantes</h3>
+                <p id="qtd-restantes">0</p>
+            </div>
+
+            <div class="kpi">
+                <h3>Total de Customizações</h3>
+                <p id="qtd-total">0</p>
+            </div>
+        </section>
+
+        <!-- Email do usuário -->
+        <section class="usuario-logado">
+            <p>Usuário logado: <span id="email-usuario">usuario@email.com</span></p>
+        </section>
+
+        <section class="graficos">
+
+            <div class="grafico-linha">
+                <h4>Linha do tempo de modificações</h4>
+                <canvas id="grafico-linha"></canvas>
+            </div>
+
+            <!-- Comparativo de cores -->
+            <div class="grafico-barra" style="width:340px;" >
+                <h4>Cores mais usadas</h4>
+                <canvas id="grafico-barra"></canvas>
+            </div>
+
+            <!-- Porcentagem de conclusão -->
+            <div class="grafico-rosca">
+                <h4>Progresso de personalização</h4>
+                <canvas id="grafico-rosca"></canvas>
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
+
+<script>
+
+    // menu
+    const toggle = document.getElementById('toggle');
+    const menuContainer = toggle.parentElement;
+
+    toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        toggle.classList.toggle('on');
+        menuContainer.classList.toggle('on');
+    });
+
+    document.addEventListener('click', function (e) {
+        const isClickInside = menuContainer.contains(e.target);
+        if (!isClickInside && menuContainer.classList.contains('on')) {
+            toggle.classList.remove('on');
+            menuContainer.classList.remove('on');
+        }
+    });
+
+    document.getElementById("nome-usuario").textContent = `${sessionStorage.NOME_USUARIO}`;
+
+    getData();
+
+
+
+    // new Chart(ctx, {
+    //     type: 'bar',
+    //     data: {
+    //         labels: ['Silo A', 'Silo B', 'Silo C', 'Silo D'],
+    //         datasets: [
+    //             {
+    //                 label: 'Dia em estoque',
+    //                 data: [10, 30, 120, 100],
+    //                 backgroundColor: ['#008000', '#9B2226', '#005F73', '#EE9B00'],
+    //                 barThickness: 60
+    //             }
+    //         ]
+    //     },
+    //     options: {
+    //         responsive: true,
+    //         plugins: {
+    //             legend: {
+    //                 display: false
+    //             },
+    //             title: {
+    //                 display: true,
+    //                 text: 'Silos e dias em armazenagem',
+    //                 color: '#222222',
+    //                 font: {
+    //                     size: 20,
+    //                 }
+    //             },
+    //             tooltip: {
+    //                 backgroundColor: '#333333',
+    //                 titleColor: '#ffffff',
+    //                 bodyColor: '#ffffff'
+    //             }
+    //         },
+    //         scales: {
+    //             x: {
+    //                 ticks: {
+    //                     color: '#111111',
+    //                 },
+    //                 grid: {
+    //                     display: false
+    //                 }
+    //             },
+    //             y: {
+    //                 ticks: {
+    //                     color: '#111111'
+    //                 },
+    //                 grid: {
+    //                     display: false
+    //                 }
+    //             }
+    //         }
+    //     }
+    // });
+
+    // const lugar = document.getElementById('grafico-linha');
+
+    // new Chart(lugar, {
+    //     type: 'line',
+    //     data: {
+    //         labels: [
+    //             '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00',
+    //             '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00',
+    //             '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+    //         ], datasets: [{
+    //             label: 'Silo A',
+    //             data: [
+    //                 1.10, 1.20, 0.80, 0.50, 1.0, 1.10, 0.90, 0.30, 0.40, 0.80, 0.40, 0.30, 0.20, 0.60,
+    //             ], borderWidth: 1,
+    //             backgroundColor: '#008000',
+    //             borderColor: '#008000'
+    //         },
+
+    //         {
+    //             label: 'Silo B',
+    //             data: [
+    //                 1.90, 2.20, 2.90, 3.10, 3.15, 2.90, 1.90, 2.30, 2.40, 1.80, 2.40, 2.30, 1.20, 2.50,
+    //             ], borderWidth: 1,
+    //             backgroundColor: '#9B2226',
+    //             borderColor: '#9B2226'
+    //         },
+
+    //         {
+    //             label: 'Silo C',
+    //             data: [
+    //                 0.50, 2.10, 4.70, 3.80, 3.10, 0.80, 1.20, 2.00, 4.20, 3.60, 0.90, 2.40, 1.00, 1.10,
+    //             ], borderWidth: 1,
+    //             backgroundColor: '#005F73',
+    //             borderColor: '#005F73'
+    //         },
+
+    //         {
+    //             label: 'Silo D',
+    //             data: [
+    //                 4.80, 2.30, 1.10, 0.30, 2.90, 3.50, 1.70, 4.90, 2.50, 1.40, 0.60, 3.10, 2.20, 2.30,
+    //             ], borderWidth: 1,
+    //             backgroundColor: '#EE9B00',
+    //             borderColor: '#EE9B00'
+    //         },
+    //         ]
+    //     },
+    //     options: {
+    //         responsive: true,
+    //         plugins: {
+    //             legend: {
+    //                 labels: {
+    //                     font: {
+    //                         size: 12
+    //                     }
+    //                 }
+    //             },
+    //             title: {
+    //                 display: true,
+    //                 text: 'Média diária dos gases nos silos (por Hora)',
+    //                 color: '#222222',
+    //                 font: {
+    //                     size: 20,
+    //                 }
+    //             },
+    //             tooltip: {
+    //                 backgroundColor: '#333333',
+    //                 titleColor: '#ffffff',
+    //                 bodyColor: '#ffffff'
+    //             }
+    //         }
+    //     }
+    // });
+
+    function getData() {
+
+        let cores = [];
+
+        fetch("/personalizacao/listar", {
+            method: "GET",
+        })
+            .then(function (resposta) {
+                resposta.json().then((personalizacoes) => {
+
+                    montaGraficoBarra(personalizacoes);
+                    montaGraficoLinha(personalizacoes);
+                    montaGraficoRosca(personalizacoes);
+
+
+                })
+            })
+            .catch(function (resposta) {
+                console.log(`#ERRO: ${resposta}`);
+            });
+
+    }
+
+
+    //Barra
+
+    function montaGraficoBarra(personalizacoes) {
+        const agrupadoPorCor = {};
+
+        personalizacoes.forEach((p) => {
+            const cor = p.cor;
+
+            if (agrupadoPorCor[cor]) {
+                agrupadoPorCor[cor].quantidade += 1;
+            } else {
+                agrupadoPorCor[cor] = {
+                    quantidade: 1,
+                    corHexa: p.corHexa
+                };
+            }
+
+        });
+
+        let data = {
+            labels: Object.keys(agrupadoPorCor),
+            datasets: [{
+                label: 'Cores mais utilizadas',
+                data: Object.values(agrupadoPorCor).map(c => c.quantidade),
+                 backgroundColor: Object.values(agrupadoPorCor).map(c => c.corHexa),
+                // borderColor: 'rgba(150, 100, 255, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Configuration options for the chart
+        let options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        };
+
+        let ctx = document.getElementById('grafico-barra')
+            .getContext('2d');
+
+        let graficoBarra = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+
+    }
+
+    //Linha
+
+    function montaGraficoLinha(personalizacoes) {
+        const agrupadoPorData = {};
+
+        personalizacoes.forEach((p) => {
+            // var data = p.dataPersonalizacao;
+            // new Date(data).toLocaleDateString()
+
+            // if (agrupadoPorData[data]) {
+            //     agrupadoPorData[data] += 1;
+            // } else {
+            //     agrupadoPorData[data] = 1;
+            // }
+
+        });
+
+        // const dataP = document.getElementById('grafico-linha');
+        // new Chart(dataP, {
+        //     type: 'line',
+        //     data: data,
+        // });
+    }
+
+    //Rosca
+
+    function montaGraficoRosca(personalizacoes) {
+
+        personalizacoes.forEach((p) => {
+
+
+        });
+    }
+
+</script>
